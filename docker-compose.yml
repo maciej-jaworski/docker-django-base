@@ -1,0 +1,29 @@
+version: '3'
+
+volumes:
+    db-data:
+    backend-data:
+
+services:
+
+    database:
+        restart: always
+        image: postgres:11.2-alpine
+        env_file:
+            - .env
+        volumes:
+            - db-data:/var/lib/postgresql/data
+
+    backend:
+        env_file:
+            - .env
+        build:
+            context: ./backend
+        ports:
+            - 8000:8000
+        command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        depends_on:
+            - database
+        volumes:
+            - ./backend/:/code/
+            - backend-data:/storage/
